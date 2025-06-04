@@ -1,0 +1,60 @@
+import time
+import hashlib
+import hmac
+import requests
+import json
+from config import GATE_KEY, GATE_SECRET
+
+def gen_sign(method, url, query_string=None, payload_string=None):
+    key = GATE_KEY      # api_key
+    secret = GATE_SECRET     # api_secret
+
+    t = time.time()
+    m = hashlib.sha512()
+    m.update((payload_string or "").encode('utf-8'))
+    hashed_payload = m.hexdigest()
+    s = '%s\n%s\n%s\n%s\n%s' % (method, url, query_string or "", hashed_payload, t)
+    sign = hmac.new(secret.encode('utf-8'), s.encode('utf-8'), hashlib.sha512).hexdigest()
+    return {'KEY': key, 'Timestamp': str(t), 'SIGN': sign}
+
+def get_balance():    
+    host = "https://api.gateio.ws"
+    prefix = "/api/v4"
+    headers = {'Accept': 'application/json', 'Content-Type': 'application/json'}
+
+    url = '/spot/accounts'
+    query_param = ''
+    sign_headers = gen_sign('GET', prefix + url, query_param)
+    headers.update(sign_headers)
+    r = requests.request('GET', host + prefix + url, headers=headers)
+
+    balances = r.json()
+
+    print("\nТвой баланс:")
+    print("-" * 30)
+    for asset in balances:
+        currency = asset['currency']
+        available = float(asset['available'])
+        locked = float(asset['locked'])
+        
+        if available > 0 or locked > 0:  # выводим только монеты, где что-то есть
+            print(f"{currency:<6} | Доступно: {available:.8f} | Заморожено: {locked:.8f}")
+    print("-" * 30)
+
+
+def launchpools():
+    host = "https://api.gateio.ws"
+    prefix = "/api/v4"
+    headers = {'Accept': 'application/json', 'Content-Type': 'application/json'}
+
+    url = '/earn/structured/orders'
+    query_param = ''
+    # for `gen_sign` implementation, refer to section `Authentication` above
+    sign_headers = gen_sign('GET', prefix + url, query_param)
+    headers.update(sign_headers)
+    r = requests.request('GET', host + prefix + url, headers=headers)
+    print(r.json())
+
+if __name__ == "__main__":
+    # get_balance()
+    launchpools()

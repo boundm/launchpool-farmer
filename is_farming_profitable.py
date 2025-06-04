@@ -1,17 +1,14 @@
 def farming_profit_check(apr_percent, funding_percent_per_4h, capital_usd, is_short=True):
     apr_daily = apr_percent / 365 / 100
-    funding_daily = funding_percent_per_4h * 6 / 100  # 6 раз в сутки
+    funding_daily = funding_percent_per_4h * 24 / 100  # 6 раз в сутки
 
-    # Доход от фарма (APR)
     farming_profit_daily = capital_usd * apr_daily
 
-    # Расход на фандинг: в шорте — платим при отриц. ставке
     if is_short:
         funding_cost_daily = capital_usd * abs(funding_daily)
     else:
         funding_cost_daily = -capital_usd * funding_daily
 
-    # Чистая прибыль
     net_daily = farming_profit_daily - funding_cost_daily
     net_yearly = net_daily * 365
 
