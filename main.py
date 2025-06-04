@@ -1,5 +1,5 @@
 import requests
-from exchanges_api import gate
+from src.exchanges_api import gate
 
 
 

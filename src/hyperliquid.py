@@ -1,5 +1,5 @@
 import ccxt
-from config import HYPERLIQUID_ADRESS, HYPERLIQUID_KEY
+from src.config import HYPERLIQUID_ADRESS, HYPERLIQUID_KEY
 
 def get_funding(ticker: str):
     dex = ccxt.hyperliquid({
